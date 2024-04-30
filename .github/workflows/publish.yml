@@ -1,0 +1,30 @@
+name: Publish
+on: 
+  push:
+    tag: v*
+jobs:
+  Publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: get-date
+        run: echo "::set-output name=DATE::$(date "+%b %d, %Y")"
+      - uses: xu-cheng/latex-action@v3
+        with:
+          root_file: "*.tex"
+          args: -xelatex -latexoption=-file-line-error -latexoption=-interaction=nonstopmode
+          latexmk_use_xelatex: true
+          extra_fonts: |
+            ./fonts/*.ttf
+            ./fonts/*.otf
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pdfs
+          path: "*.pdf"
+      - uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: Resume (${{ steps.get-date.outputs.DATE }})
+          body: |
+            This resume is published on ${{ steps.get-date.outputs.DATE }}
+          files: "*.pdf"
