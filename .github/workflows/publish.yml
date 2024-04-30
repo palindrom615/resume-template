@@ -1,14 +1,14 @@
 name: Publish
-on: 
-  push:
-    tag: v*
+on: push
+permissions:
+  contents: write
 jobs:
   Publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - id: get-date
-        run: echo "::set-output name=DATE::$(date "+%b %d, %Y")"
+        run: echo "DATE=$(date '+%b %d, %Y')" >> $GITHUB_OUTPUT
       - uses: xu-cheng/latex-action@v3
         with:
           root_file: "*.tex"
@@ -17,11 +17,11 @@ jobs:
           extra_fonts: |
             ./fonts/*.ttf
             ./fonts/*.otf
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: pdfs
           path: "*.pdf"
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: Resume (${{ steps.get-date.outputs.DATE }})
